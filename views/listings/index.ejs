@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fsrHome</title>
-</head>
+<% layout('layouts/boilerplate') %>
 <body>
     <h1>Listings</h1>
-    <form action="/listings/new" method="GET">
-        <button type="submit">Create New Listing</button>
-    </form>
     <br/>
     <% for(let listing of allListings) { %>
     <div>
@@ -18,5 +9,5 @@
     <% } %>
 
 </body>
-</html>
+
  
