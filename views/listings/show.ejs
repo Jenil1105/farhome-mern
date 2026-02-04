@@ -1,9 +1,26 @@
 <% layout('layouts/boilerplate') %> 
 <body>
-    <h1><%= listing.title %></h1>
-    <p><%= listing.description %></p>
-    <p>Price: $<%= listing.price %></p>
-    <a href="/listings/<%= listing._id %>/update">Edit Listing</a>
-    <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" style="display:inline;">
-        <button type="submit">Delete Listing</button>
-    </form>
+
+    <div class="row">
+        <div class="col-8 offset-3">
+            <br><br>
+            <div class="card col-8">
+                <img src="<%= listing.image %>" class="card-img-top show-img" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title"><%= listing.title %></h5>
+                    <p class="card-text"><%= listing.description %></p>
+                    <p class="card-text">Price: $<%= listing.price %></p>
+                    <p class="card-text">Location: <%= listing.location %>, <%= listing.country %></p>
+                    <a href="/listings/<%= listing._id %>/update" class="btn btn-danger">Edit Listing</a>
+                    <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-dark">Delete Listing</button>
+                    </form>
+                </div>
+                
+            </div>
+
+        </div>
+    </div>
+
+
+</body>
