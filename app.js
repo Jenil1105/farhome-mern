@@ -5,6 +5,9 @@ const ejs = require('ejs');
 const Listing = require('./models/listing');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
+const wrapAsync = require('./utils/wrapAsync');
+const ExpressError = require('./utils/expressErrors');
+const listingSchema = require('./schema');
 
 
 
@@ -33,13 +36,24 @@ app.get('/', (req, res) => {
 });
 
 
+const validateListing = (req, res, next) => {
+    const { error } = listingSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',');
+        throw new ExpressError(msg, 400);
+    } else {
+        next();
+    }   
+};
+
+
 // Route to display all listings
-app.get('/listings', async (req, res) => {
+app.get('/listings', wrapAsync(async (req, res) => {
 
     let allListings = await Listing.find({})
 
     res.render('listings/index.ejs', { allListings });
-});
+})) ;
 
 // create new listing
 app.get('/listings/new', (req,res)=>{
@@ -48,33 +62,29 @@ app.get('/listings/new', (req,res)=>{
 
 
 // show listing by id
-app.get('/listings/:id', async (req, res) => {
+app.get('/listings/:id', wrapAsync(async (req, res) => {
     let { id } = req.params;
     let listing = await Listing.findById(id);
     res.render('listings/show.ejs', { listing });
-});
-
+}));
 //create route
-app.post('/listings', async (req, res) => {
+app.post('/listings',validateListing, wrapAsync(async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect('/listings');
-});
-
+}));
 //edit route
-app.get('/listings/:id/update', async (req, res) => {
+app.get('/listings/:id/update', wrapAsync(async (req, res) => {
     const { id } = req.params;
     let listing = await Listing.findById(id);
     res.render('listings/update.ejs', { listing });
-});
-
+}));
 //update route
-app.put('/listings/:id', async (req, res) => {
+app.put('/listings/:id',validateListing, wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Listing.findByIdAndUpdate(id, {...req.body.listing});
     res.redirect(`/listings/${id}`);
-});
-
+}));
 //delete route
 app.delete('/listings/:id', async (req, res) => {
     const { id } = req.params;
@@ -82,20 +92,16 @@ app.delete('/listings/:id', async (req, res) => {
     res.redirect('/listings');
 });
 
-// app.get('/testListing', async (req, res) => {
-//     let sampleListing = new Listing({
-//         title: "Cozy Cottage",
-//         description: "A cozy cottage in the countryside.",  
-//         images: "",
-//         price: 1500,
-//         location: "Countryside",
-//         country: "Wonderland",
-//     });
-//     await sampleListing.save();
-//     console.log("Sample listing saved:", sampleListing);
-//     res.send('Sample listing created and saved to the database.');
-// });
- 
+
+app.use((req, res, next) => {
+    next(new ExpressError('Page Not Found', 404));
+});
+
+app.use((err, req, res, next) => {
+    let { statusCode = 500, message = "Something went wrong!" } = err;
+    res.status(statusCode).render('listings/err.ejs', { err });
+});
+
 app.listen(8080, () => {
     console.log('Server is running on port 8080');
 }); 

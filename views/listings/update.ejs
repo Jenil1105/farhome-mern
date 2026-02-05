@@ -6,38 +6,57 @@
             <br><br>
             <h1 class="heading-new-lising">Update Listing</h1>
             <br>
-            <form action="/listings/<%= listing._id %>?_method=PUT" method="POST">
-                <div class="mb-2 h">
+            <form action="/listings/<%= listing._id %>?_method=PUT" method="POST" novalidate class="needs-validation">
+                <div class="mb-2">
                     <label for="title" class="form-label">Title:</label>
-                    <input class="form-control" type="text" id="title" name="listing[title]" value="<%= listing.title %>" required><br><br>
+                    <input class="form-control" type="text" id="title" name="listing[title]" value="<%= listing.title %>" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a title!!    
+                    </div>
                 </div>
                 
-                <div class="mb-2 hh">
+                <div class="mb-2">
                     <label for="description" class="form-label">Description:</label>
-                    <textarea class="form-control" id="description" name="listing[description]" placeholder="Describe the Place..." required><%= listing.description %></textarea><br><br>
+                    <textarea class="form-control" id="description" name="listing[description]" placeholder="Describe the Place..." required><%= listing.description %></textarea>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
                 </div>
 
-                <div class="mb-2 h">
+                <div class="mb-2">
                     <label for="image" class="form-label">Image URL:</label>
-                    <input class="form-control" type="text" id="image" name="listing[image]" value="<%= listing.image %>" ><br><br>
+                    <input class="form-control" type="text" id="image" name="listing[image]" value="<%= listing.image %>" >
                 </div>
 
                 <div class="row">
                 
-                    <div class="mb-2 h col-md-4">
+                    <div class="mb-2 col-md-4">
                         <label for="price" class="form-label">Price:</label>
-                        <input class="form-control"  type="number" id="price" name="listing[price]" value="<%= listing.price %>" required><br><br>
+                        <input class="form-control"  type="number" id="price" name="listing[price]" value="<%= listing.price %>" required>
+                        <div class="invalid-feedback">
+                            Please provide a price!!
+                        </div>
                     </div>
 
-                    <div class="mb-2 h col-md-8">
+
+                    <div class="mb-2 col-md-8">
                         <label for="country" class="form-label">Country:</label>
-                        <input class="form-control" type="text" id="country" name="listing[country]" value="<%= listing.country %>" required><br><br>
+                        <input class="form-control" type="text" id="country" name="listing[country]" value="<%= listing.country %>" required>
+                        <div class="invalid-feedback">
+                            Please provide a country!!
+                        </div>
                     </div>
                 </div>
                     
-                <div class="mb-2 h">
+                <div class="mb-2">
                     <label for="location" class="form-label">Location:</label>
-                    <input class="form-control" type="text" id="location" name="listing[location]" value="<%= listing.location %>" required><br><br>
+                    <input class="form-control" type="text" id="location" name="listing[location]" value="<%= listing.location %>" required>
+                    <div class="invalid-feedback">
+                        Please provide a location!!
+                    </div>
                 </div>
 
                 
