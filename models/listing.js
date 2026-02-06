@@ -11,6 +11,13 @@ const listingSchema = new Schema({
     price: { type: Number, required: true },
     location: { type: String, required: true },
     country: { type: String, required: true },
+    reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
+});
+
+listingSchema.post('findOneAndDelete', async function(doc) {
+    if (doc) {
+        await mongoose.model('Review').deleteMany({ _id: { $in: doc.reviews } });
+    }
 });
 
 const Listing = mongoose.model('Listing', listingSchema);
