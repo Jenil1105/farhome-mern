@@ -2,18 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const ejs = require('ejs');
-const Listing = require('./models/listing');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
-const wrapAsync = require('./utils/wrapAsync');
 const ExpressError = require('./utils/expressErrors');
-const listingSchema = require('./schema');
-const reviewSchema = require('./schema').reviewSchema;
-const Review = require('./models/review');
-
-
-
+const session = require('express-session');
 const app = express();
+const flash = require('connect-flash');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
@@ -33,100 +27,30 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const sessionConfig = {
+    secret: 'thisshouldbeabettersecret',
+    resave: false,
+    saveUninitialized: true,
+};
+app.use(session(sessionConfig));
+
 app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
-// Validation middleware 
+app.use(flash());
 
-const validateListing = (req, res, next) => {
-    const { error } = listingSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400);
-    } else {
-        next();
-    }   
-};
-
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400);
-    } else {
-        next();
-    }   
-};
-
-
-// Route to display all listings
-app.get('/listings', wrapAsync(async (req, res) => {
-
-    let allListings = await Listing.find({})
-
-    res.render('listings/index.ejs', { allListings });
-})) ;
-
-// create new listing
-app.get('/listings/new', (req,res)=>{
-    res.render('listings/new.ejs');
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
 });
 
-
-// show listing by id
-app.get('/listings/:id', wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    let listing = await Listing.findById(id).populate('reviews');
-    res.render('listings/show.ejs', { listing });
-}));
-//create route
-app.post('/listings',validateListing, wrapAsync(async (req, res) => {
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    res.redirect('/listings');
-}));
-//edit route
-app.get('/listings/:id/update', wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    let listing = await Listing.findById(id);
-    res.render('listings/update.ejs', { listing });
-}));
-//update route
-app.put('/listings/:id',validateListing, wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    await Listing.findByIdAndUpdate(id, {...req.body.listing});
-    res.redirect(`/listings/${id}`);
-}));
-//delete route
-app.delete('/listings/:id', async (req, res) => {
-    const { id } = req.params;
-    await Listing.findByIdAndDelete(id);
-    res.redirect('/listings');
-});
+//listings routes
+app.use('/listings', require('./routes/listing.js'));
 
 //reviews routes
-
-//post review
-app.post('/listings/:id/reviews', validateReview, wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id);
-    const review = new Review(req.body.review);
-    listing.reviews.push(review);
-    await review.save();
-    await listing.save();
-    res.redirect(`/listings/${id}`);
-}));
-
-//delete review
-app.delete('/listings/:id/reviews/:reviewId', wrapAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/listings/${id}`);
-}));
-
-
+app.use('/listings/:id/reviews', require('./routes/review.js'));
 
 
 app.use((req, res, next) => {
@@ -140,4 +64,4 @@ app.use((err, req, res, next) => {
 
 app.listen(8080, () => {
     console.log('Server is running on port 8080');
-}); 
+});  
