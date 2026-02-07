@@ -4,6 +4,7 @@ const Listing = require('../models/listing');
 const wrapAsync = require('../utils/wrapAsync');
 const ExpressError = require('../utils/expressErrors');
 const listingSchema = require('../schema').listingSchema;
+const { isLogedIn } = require('../middleware');
 
 
 
@@ -33,7 +34,7 @@ router.get('/', wrapAsync(async (req, res) => {
 })) ;
 
 // create new listing
-router.get('/new', (req,res)=>{
+router.get('/new', isLogedIn, (req,res)=>{
     res.render('listings/new.ejs');
 });
 
@@ -50,7 +51,7 @@ router.get('/:id', wrapAsync(async (req, res) => {
 }));
 
 //create route
-router.post('/',validateListing, wrapAsync(async (req, res) => {
+router.post('/',validateListing, isLogedIn, wrapAsync(async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     req.flash("success", "New listing created!");
@@ -58,7 +59,7 @@ router.post('/',validateListing, wrapAsync(async (req, res) => {
 }));
 
 //edit route
-router.get('/:id/update', wrapAsync(async (req, res) => {
+router.get('/:id/update', isLogedIn, wrapAsync(async (req, res) => {
     const { id } = req.params;
     let listing = await Listing.findById(id);
     if(!listing){
@@ -69,7 +70,7 @@ router.get('/:id/update', wrapAsync(async (req, res) => {
 }));
 
 //update route
-router.put('/:id',validateListing, wrapAsync(async (req, res) => {
+router.put('/:id',validateListing, isLogedIn, wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Listing.findByIdAndUpdate(id, {...req.body.listing});
     res.redirect(`/listings/${id}`);
