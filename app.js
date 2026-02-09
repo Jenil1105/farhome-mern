@@ -10,6 +10,7 @@ const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utils/expressErrors');
 const session = require('express-session');
+const MongoStore = require('connect-mongo').default;
 const app = express();
 const flash = require('connect-flash');
 const User = require('./models/user');
@@ -25,30 +26,40 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.engine('ejs', ejsMate); 
 
-
-MONGO_URI = 'mongodb://localhost:27017/farhome';
+Mongo_Atlas_URL = process.env.MONGO_ATLAS;
+//MONGO_URI = 'mongodb://localhost:27017/farhome';
 
 main().then(() => console.log("MongoDB connected,,, yayyy"))
   .catch(err => console.error(err));
 
 async function main() {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(Mongo_Atlas_URL);
 }
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+const store = MongoStore.create({
+    mongoUrl: Mongo_Atlas_URL,
+    crypto: {
+        secret: process.env.SECRET
+    },
+    touchAfter: 24*3600
+});
+
+store.on('error', (err)=>{
+    console.log('Error in mongoStore', err);
+});
+
 const sessionConfig = {
-    secret: 'thisshouldbeabettersecret',
+    store: store,
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
 };
 app.use(session(sessionConfig));
-
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
-});
 
 app.use(flash());
 

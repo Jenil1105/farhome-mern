@@ -13,13 +13,13 @@ body{
 
 .navbar{
     height: 5rem;
-    background-color: aliceblue;
+    background-color: white;
 }
 
 .fa-map-location{
     font-size: 1.5rem;
     font-weight: bold;
-    color: #cb2f39;
+    color: #f50e0e;
 }
 
 .nav-link{
