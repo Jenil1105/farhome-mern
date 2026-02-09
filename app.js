@@ -1,3 +1,7 @@
+if(process.env.NODE_ENV != "production"){
+    require("dotenv").config();
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -14,6 +18,7 @@ const LocalStrategy = require('passport-local');
 const listingRoutes = require('./routes/listing');
 const reviewRoutes = require('./routes/review');
 const userRoutes = require('./routes/user');
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
